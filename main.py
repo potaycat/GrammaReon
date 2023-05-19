@@ -12,7 +12,15 @@ WHITELIST = {
     "im": "I'm",
     "Im": "I'm",
     "isnt": "isn't",
+    "its": "it's",
+    "Its": "it's",
 }
+WHITELISTED_USERS = [
+    int(x.strip()) for x in os.getenv("WHITELISTED_USERS", "").split(",") if x.strip()
+]
+WHITELISTED_GUILDS = [
+    int(x.strip()) for x in os.getenv("WHITELISTED_GUILDS", "").split(",") if x.strip()
+]
 
 
 class GrammaReon(Bot):
@@ -50,10 +58,14 @@ class GrammaReon(Bot):
             return
         if "Reon" in message.author.name:
             return
+        if message.guild.id in WHITELISTED_GUILDS:
+            return
+        if message.author.id in WHITELISTED_USERS:
+            return
         try:
             text = message.content
             for word, replacement in WHITELIST.items():
-                text = text.replace(word, replacement)
+                text = text.replace(word, replacement).capitalize()
             res = await self.detect_grammar(text)
             if res["corrections"].__len__():
                 await message.author.send(
